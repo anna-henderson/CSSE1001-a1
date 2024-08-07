@@ -34,7 +34,7 @@ def num_hours() -> float:
     Returns:
         Float number of hours spent on assignment
     """
-    return 6
+    return 6.0
 
 
 def create_empty_board(board_size: int) -> list[str]:
@@ -46,13 +46,7 @@ def create_empty_board(board_size: int) -> list[str]:
     Returns:
         Empty board
     """
-    row = EMPTY_SQUARE * board_size
-
-    board = []
-    for i in range(board_size):
-        board.append(row)
-
-    return board
+    return [EMPTY_SQUARE * board_size] * board_size
 
 
 def get_square(board: list[str], position: tuple[int, int]) -> str:
@@ -64,6 +58,9 @@ def get_square(board: list[str], position: tuple[int, int]) -> str:
 
     Returns:
         The square in the specified position on the board as a string
+
+    Pre-condition:
+        Position must exist on the board
     """
     row, col = position
     return board[row][col]
@@ -77,21 +74,12 @@ def change_square(board: list[str], position: tuple[int, int], new_square: str) 
         position: The position we want to get of the board as (row,column)
         new_square: The new square string to go in position on the board
 
-    Returns:
-        Returns None
+    Pre-condition:
+        Position must exist on the board
     """
     row, col = position
-    new_row = ""
-
-    # Looping over the string values to change the square in the "col" position
-    for idx, current_square in enumerate(board[row]):
-        if idx != col:
-            new_row += current_square
-        else:
-            new_row += new_square
-
-    # Replace the edited row
-    board[row] = new_row
+    # Take parts of the string around the position and adds new_square in between
+    board[row] = board[row][:col] + new_square + board[row][col + 1 :]
 
 
 def coordinate_to_position(coordinate: str) -> tuple[int, int]:
@@ -102,6 +90,10 @@ def coordinate_to_position(coordinate: str) -> tuple[int, int]:
 
     Returns:
         Tuple of row, column coordinates
+
+    Pre-condition:
+        Coordinate must consist of two characters where the first is a capital letter from "A" to "I" and the second is a single digit character
+
     """
     column, row = coordinate[0], coordinate[1]
 
@@ -110,7 +102,7 @@ def coordinate_to_position(coordinate: str) -> tuple[int, int]:
 
     # Dictionary lookup to get column index
     column_value = LETTER_TO_INDEX[column]
-    return (row_value, column_value)
+    return row_value, column_value
 
 
 def can_place_ship(board: list[str], ship: list[tuple[int, int]]) -> bool:
@@ -122,6 +114,9 @@ def can_place_ship(board: list[str], ship: list[tuple[int, int]]) -> bool:
 
     Returns:
         Returns boolean if the ship can be placed on the board
+
+    Pre-condition:
+        All positions in ship must exist on the board
     """
     for row, col in ship:
         if board[row][col] != EMPTY_SQUARE:
@@ -136,8 +131,8 @@ def place_ship(board: list[str], ship: list[tuple[int, int]]) -> None:
         board: The game board
         shift: The ship to be placed on the board
 
-    Returns:
-        Returns None
+    Pre-condition:
+        ship should be able to be placed on the board according to can_place_ship.
     """
     for position in ship:
         change_square(board, position, ACTIVE_SHIP_SQUARE)
@@ -150,8 +145,8 @@ def attack(board: list[str], position: tuple[int, int]) -> None:
         board: The game board
         position: The position we want to get of the board as (row,column)
 
-    Returns:
-        Returns None
+    Pre-condition:
+        position must exist on board
     """
     row, col = position
     if board[row][col] == ACTIVE_SHIP_SQUARE:
@@ -166,9 +161,6 @@ def display_board(board: list[str], show_ships: bool) -> None:
     Parameters:
         board: The game board
         show_ships: Boolean of whether to show ships or not
-
-    Returns:
-        Returns None
     """
     header = HEADER_SEPARATOR
     for i in range(len(board)):
@@ -197,9 +189,7 @@ def get_player_hp(board: list[str]) -> int:
     """
     hp = 0
     for row in board:
-        for square in row:
-            if square == ACTIVE_SHIP_SQUARE:
-                hp += 1
+        hp += row.count(ACTIVE_SHIP_SQUARE)
     return hp
 
 
@@ -211,9 +201,6 @@ def display_game(p1_board: list[str], p2_board: list[str], show_ships: bool) -> 
         p1_board: The game board of player 1
         p2_board: The game board of player 2
         show_ships: Boolean of whether to show ships or not
-
-    Returns:
-        Returns None
     """
     # Loops over each player's board and print the board and hp remaining
     for board, player in [(p1_board, PLAYER_ONE), (p2_board, PLAYER_TWO)]:
@@ -244,8 +231,10 @@ def is_valid_coordinate(coordinate: str, board_size: int) -> tuple[bool, str]:
     # Check if the first digit is a valid letter but is our of range for the board
     elif board_size <= LETTER_TO_INDEX.get(coordinate[0]):
         return (False, INVALID_COORDINATE_LETTER)
-    # Check if the second didgit is not a valid integer or is out of range
-    elif coordinate[1] not in INTEGERS_AS_STRINGS or board_size < int(coordinate[1]):
+    # Check if the second digit is not a valid integer or is out of range
+    elif not coordinate[1].isdigit() or int(coordinate[1]) not in range(
+        1, board_size + 1
+    ):
         return (False, INVALID_COORDINATE_NUMBER)
     else:
         return (True, "")
@@ -286,6 +275,9 @@ def build_ship(coordinate_sequence: str) -> list[tuple[int, int]]:
 
     Returns:
         Returns the list of (row, column) positions corresponding to the coordinate sequence.
+
+    Pre-condition:
+        coordinate_sequence must represent a valid coordinate sequence
     """
     coords = coordinate_sequence.split(",")
     coordinates = []
@@ -360,9 +352,6 @@ def make_attack(target_board: list[str]) -> None:
 
     Parameters:
         target_board: The target game board
-
-    Returns:
-        Returns None
     """
     has_not_attacked = True
     # Repeat until a valid move has been made
@@ -380,13 +369,7 @@ def make_attack(target_board: list[str]) -> None:
 
 
 def play_game() -> None:
-    """Coordinates gameplay of a single game of Battleships from start to finish according to section 3.
-
-    Parameters:
-
-    Returns:
-        Returns None
-    """
+    """Coordinates gameplay of a single game of Battleships from start to finish according to section 3."""
     board_size = int(input("Enter board size: "))
     ship_sizes_str = input("Enter ships sizes: ")
 
