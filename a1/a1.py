@@ -23,7 +23,6 @@ ROW_INDEX_TO_LETTER = {
     7: "H",
     8: "I",
 }
-INTEGERS_AS_STRINGS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 
 def num_hours() -> float:
@@ -45,6 +44,9 @@ def create_empty_board(board_size: int) -> list[str]:
 
     Returns:
         Empty board
+
+    Pre-condition:
+        board_size must be between 3 and 9
     """
     return [EMPTY_SQUARE * board_size] * board_size
 
@@ -86,7 +88,7 @@ def coordinate_to_position(coordinate: str) -> tuple[int, int]:
     """Returns the (row, column) position tuple corresponding to the given coordinate.
 
     Parameters:
-        coordinates: The coordinate in the format of "A1"
+        coordinate: The coordinate in the format of "A1"
 
     Returns:
         Tuple of row, column coordinates
@@ -95,11 +97,10 @@ def coordinate_to_position(coordinate: str) -> tuple[int, int]:
         Coordinate must consist of two characters where the first is a capital letter from "A" to "I" and the second is a single digit character
 
     """
-    column, row = coordinate[0], coordinate[1]
+    column, row = coordinate
 
     # Input value - 1 as lists are 0 indexed
     row_value = int(row) - 1
-
     # Dictionary lookup to get column index
     column_value = LETTER_TO_INDEX[column]
     return row_value, column_value
@@ -409,3 +410,15 @@ def play_game() -> None:
 
 if __name__ == "__main__":
     play_game()
+    pass
+
+
+# def run_tests():
+# TEST 1
+#     board_size = 3
+#     breakpoint()
+#     board = setup_board(board_size,[3,4])
+#     print(board)
+
+
+# run_tests()
